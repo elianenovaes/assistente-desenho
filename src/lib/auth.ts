@@ -1,7 +1,11 @@
-import { supabase } from './supabase'
+import { supabase, isSupabaseConfigured } from './supabase'
 
 // Função para fazer login
 export async function signIn(email: string, password: string) {
+  if (!isSupabaseConfigured()) {
+    throw new Error('Supabase não está configurado')
+  }
+  
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
@@ -13,6 +17,10 @@ export async function signIn(email: string, password: string) {
 
 // Função para criar conta
 export async function signUp(email: string, password: string, name: string) {
+  if (!isSupabaseConfigured()) {
+    throw new Error('Supabase não está configurado')
+  }
+  
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -30,12 +38,20 @@ export async function signUp(email: string, password: string, name: string) {
 
 // Função para fazer logout
 export async function signOut() {
+  if (!isSupabaseConfigured()) {
+    return
+  }
+  
   const { error } = await supabase.auth.signOut()
   if (error) throw error
 }
 
 // Função para recuperar senha
 export async function resetPassword(email: string) {
+  if (!isSupabaseConfigured()) {
+    throw new Error('Supabase não está configurado')
+  }
+  
   const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${window.location.origin}/auth/reset-password`,
   })
@@ -46,6 +62,10 @@ export async function resetPassword(email: string) {
 
 // Função para atualizar senha
 export async function updatePassword(newPassword: string) {
+  if (!isSupabaseConfigured()) {
+    throw new Error('Supabase não está configurado')
+  }
+  
   const { data, error } = await supabase.auth.updateUser({
     password: newPassword,
   })
@@ -56,6 +76,10 @@ export async function updatePassword(newPassword: string) {
 
 // Função para obter usuário atual (NÃO lança erro se não houver usuário)
 export async function getCurrentUser() {
+  if (!isSupabaseConfigured()) {
+    return null
+  }
+  
   try {
     const { data: { user }, error } = await supabase.auth.getUser()
     if (error) {
@@ -71,6 +95,10 @@ export async function getCurrentUser() {
 
 // Função para verificar se usuário está autenticado
 export async function isAuthenticated() {
+  if (!isSupabaseConfigured()) {
+    return false
+  }
+  
   try {
     const { data: { session } } = await supabase.auth.getSession()
     return !!session

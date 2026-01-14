@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { supabase, isSupabaseConfigured } from './supabase'
 
 const DEFAULT_THEMES = {
   'Animais': [
@@ -45,6 +45,11 @@ const DEFAULT_THEMES = {
 
 // Verificar se há sessão ativa
 async function hasActiveSession(): Promise<boolean> {
+  // Se Supabase não está configurado, retornar false
+  if (!isSupabaseConfigured()) {
+    return false
+  }
+
   try {
     const { data: { session }, error } = await supabase.auth.getSession()
     if (error) {
@@ -60,6 +65,12 @@ async function hasActiveSession(): Promise<boolean> {
 
 // Salvar temas do usuário no Supabase
 export async function saveUserThemes(userId: string, themes: Record<string, string[]>) {
+  // Se Supabase não está configurado, não fazer nada
+  if (!isSupabaseConfigured()) {
+    console.warn('Supabase não configurado - temas não serão salvos')
+    return
+  }
+
   try {
     // Verificar se há sessão ativa antes de tentar salvar
     const hasSession = await hasActiveSession()
@@ -90,6 +101,11 @@ export async function saveUserThemes(userId: string, themes: Record<string, stri
 
 // Carregar temas do usuário do Supabase
 export async function loadUserThemes(userId: string): Promise<Record<string, string[]>> {
+  // Se Supabase não está configurado, retornar temas padrão
+  if (!isSupabaseConfigured()) {
+    return DEFAULT_THEMES
+  }
+
   try {
     // Verificar se há sessão ativa antes de tentar carregar
     const hasSession = await hasActiveSession()
@@ -118,6 +134,12 @@ export async function loadUserThemes(userId: string): Promise<Record<string, str
 
 // Salvar histórico de jogo do usuário
 export async function saveGameHistory(userId: string, gameData: any) {
+  // Se Supabase não está configurado, não fazer nada
+  if (!isSupabaseConfigured()) {
+    console.warn('Supabase não configurado - histórico não será salvo')
+    return
+  }
+
   try {
     // Verificar se há sessão ativa antes de tentar salvar
     const hasSession = await hasActiveSession()
@@ -146,6 +168,11 @@ export async function saveGameHistory(userId: string, gameData: any) {
 
 // Carregar histórico de jogo do usuário
 export async function loadGameHistory(userId: string) {
+  // Se Supabase não está configurado, retornar array vazio
+  if (!isSupabaseConfigured()) {
+    return []
+  }
+
   try {
     // Verificar se há sessão ativa antes de tentar carregar
     const hasSession = await hasActiveSession()
