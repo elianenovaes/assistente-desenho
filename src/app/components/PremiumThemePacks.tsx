@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Package, Crown, Check, X } from 'lucide-react'
+import { Package, Crown, Check } from 'lucide-react'
 import { PremiumBadge } from './PremiumBadge'
 
 interface PremiumThemePacksProps {
@@ -88,19 +88,9 @@ export function PremiumThemePacks({ isPremium, onPacksSelected, selectedPacks, o
       </DialogTrigger>
       <DialogContent className="max-w-3xl max-h-[85vh] overflow-hidden flex flex-col">
         <DialogHeader className="flex-shrink-0">
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500">
-              Pacotes de Temas Exclusivos
-            </DialogTitle>
-            <Button
-              onClick={() => setIsOpen(false)}
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0 rounded-full hover:bg-gray-100"
-            >
-              <X className="w-5 h-5 text-gray-500" />
-            </Button>
-          </div>
+          <DialogTitle className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500">
+            Pacotes de Temas Exclusivos
+          </DialogTitle>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto pr-2">
