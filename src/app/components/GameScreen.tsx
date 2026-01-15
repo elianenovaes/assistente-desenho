@@ -70,6 +70,11 @@ export function GameScreen({ username, onLogout, isGuestMode }: GameScreenProps)
   const alarmSoundRef = useRef<HTMLAudioElement | null>(null)
   const lastWarningTimeRef = useRef<Map<string, number>>(new Map())
 
+  // Scroll para o topo ao carregar
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
+
   useEffect(() => {
     // Carregar histórico do localStorage apenas se não for modo guest
     if (!isGuestMode) {
@@ -318,6 +323,8 @@ export function GameScreen({ username, onLogout, isGuestMode }: GameScreenProps)
     setShowRanking(false)
     setFinishedPlayers(new Set())
     lastWarningTimeRef.current.clear()
+    // Scroll para o topo ao reiniciar
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const handleSelectWinner = (playerName: string, position: number) => {

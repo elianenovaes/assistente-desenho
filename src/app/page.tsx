@@ -35,6 +35,11 @@ export default function Home() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
+  // Scroll para o topo ao carregar a página
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
+
   // Verificar se usuário já está logado ao carregar
   useEffect(() => {
     checkUser()
@@ -234,6 +239,7 @@ export default function Home() {
     setShowForgotPassword(false)
     setErrorMessage('')
     setSuccessMessage('')
+    window.scrollTo(0, 0)
   }
 
   const switchToLogin = () => {
@@ -241,6 +247,7 @@ export default function Home() {
     setShowForgotPassword(false)
     setErrorMessage('')
     setSuccessMessage('')
+    window.scrollTo(0, 0)
   }
 
   const switchToForgotPassword = () => {
@@ -248,6 +255,7 @@ export default function Home() {
     setShowSignup(false)
     setErrorMessage('')
     setSuccessMessage('')
+    window.scrollTo(0, 0)
   }
 
   if (!isLoggedIn) {
