@@ -11,6 +11,7 @@ interface ThemeSelectorProps {
   customThemes?: Record<string, string[]>
   isPremium?: boolean
   selectedPremiumPacks?: string[]
+  selectedCategories?: string[]
 }
 
 const DEFAULT_THEMES = {
@@ -56,7 +57,14 @@ const DEFAULT_THEMES = {
   ]
 }
 
-export function ThemeSelector({ onThemeSelected, disabled, customThemes, isPremium = false, selectedPremiumPacks = [] }: ThemeSelectorProps) {
+export function ThemeSelector({ 
+  onThemeSelected, 
+  disabled, 
+  customThemes, 
+  isPremium = false, 
+  selectedPremiumPacks = [],
+  selectedCategories = []
+}: ThemeSelectorProps) {
   const [isGenerating, setIsGenerating] = useState(false)
   const [themes, setThemes] = useState(DEFAULT_THEMES)
 
@@ -85,9 +93,21 @@ export function ThemeSelector({ onThemeSelected, disabled, customThemes, isPremi
   const generateTheme = () => {
     setIsGenerating(true)
     
+    // Filtrar categorias baseado na seleção do usuário (se premium e houver seleção)
+    let availableCategories = Object.keys(themes)
+    
+    if (isPremium && selectedCategories.length > 0) {
+      // Usar apenas as categorias selecionadas
+      availableCategories = availableCategories.filter(cat => selectedCategories.includes(cat))
+    }
+    
+    // Se não houver categorias disponíveis, usar todas
+    if (availableCategories.length === 0) {
+      availableCategories = Object.keys(themes)
+    }
+    
     // Selecionar categoria aleatória
-    const categories = Object.keys(themes)
-    const randomCategory = categories[Math.floor(Math.random() * categories.length)]
+    const randomCategory = availableCategories[Math.floor(Math.random() * availableCategories.length)]
     
     // Selecionar tema aleatório da categoria
     const themesInCategory = themes[randomCategory as keyof typeof themes]
@@ -108,6 +128,11 @@ export function ThemeSelector({ onThemeSelected, disabled, customThemes, isPremi
       setIsGenerating(false)
     }, 500)
   }
+
+  // Calcular quantas categorias estão ativas
+  const activeCategories = isPremium && selectedCategories.length > 0 
+    ? selectedCategories.length 
+    : Object.keys(themes).length
 
   return (
     <>
@@ -130,7 +155,7 @@ export function ThemeSelector({ onThemeSelected, disabled, customThemes, isPremi
       </Button>
       
       <p className="text-sm text-gray-600 font-bold mt-4 text-center">
-        ✨ {Object.keys(themes).length} categorias disponíveis
+        ✨ {activeCategories} categoria(s) ativa(s)
       </p>
     </>
   )

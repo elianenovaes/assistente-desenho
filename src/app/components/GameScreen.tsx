@@ -13,6 +13,7 @@ import { ChallengeWheel } from './ChallengeWheel'
 import { PremiumThemePacks } from './PremiumThemePacks'
 import { CustomThemeEditor } from './CustomThemeEditor'
 import { PremiumBadge } from './PremiumBadge'
+import { CategorySelector } from './CategorySelector'
 
 interface GameScreenProps {
   username: string
@@ -71,6 +72,7 @@ export function GameScreen({ username, onLogout, isGuestMode }: GameScreenProps)
   const [extraChallenge, setExtraChallenge] = useState<string | null>(null)
   const [selectedPremiumPacks, setSelectedPremiumPacks] = useState<string[]>([])
   const [customThemeLists, setCustomThemeLists] = useState<Record<string, string[]>>({})
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   
   // Novos estados para configuração de tempos
   const [availableTimes, setAvailableTimes] = useState<number[]>([60, 120, 300])
@@ -543,6 +545,28 @@ export function GameScreen({ username, onLogout, isGuestMode }: GameScreenProps)
                   customThemes={customThemes}
                   isPremium={isPremium}
                   selectedPremiumPacks={selectedPremiumPacks}
+                  selectedCategories={selectedCategories}
+                />
+
+                {/* Seletor de Categorias (Premium) */}
+                <CategorySelector
+                  isPremium={isPremium}
+                  availableCategories={Object.keys({
+                    ...customThemes,
+                    'Animais': [],
+                    'Objetos': [],
+                    'Alimentos': [],
+                    'Natureza': [],
+                    'Profissões': [],
+                    'Esportes': [],
+                    'Emoções': [],
+                    'Lugares': [],
+                    ...(isPremium && selectedPremiumPacks.length > 0 
+                      ? Object.fromEntries(selectedPremiumPacks.map(pack => [pack, []]))
+                      : {})
+                  })}
+                  selectedCategories={selectedCategories}
+                  onCategoriesSelected={setSelectedCategories}
                 />
 
                 {/* Funcionalidades Premium */}
