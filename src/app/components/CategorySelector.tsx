@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Settings, Check, Crown } from 'lucide-react'
+import { Settings, Check, Crown, X } from 'lucide-react'
 import { PremiumBadge } from './PremiumBadge'
 
 interface CategorySelectorProps {
@@ -11,13 +11,15 @@ interface CategorySelectorProps {
   availableCategories: string[]
   selectedCategories: string[]
   onCategoriesSelected: (categories: string[]) => void
+  onPremiumClick?: () => void
 }
 
 export function CategorySelector({ 
   isPremium, 
   availableCategories, 
   selectedCategories, 
-  onCategoriesSelected 
+  onCategoriesSelected,
+  onPremiumClick
 }: CategorySelectorProps) {
   const [isOpen, setIsOpen] = useState(false)
 
@@ -56,107 +58,145 @@ export function CategorySelector({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="w-full h-14 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 font-black text-lg shadow-lg">
-          <Settings className="w-5 h-5 mr-2" />
-          Selecionar Categorias
-          {!isPremium && <PremiumBadge size="sm" className="ml-2" />}
+        <Button className="w-full h-14 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 font-black text-lg shadow-lg flex items-center justify-center gap-2">
+          <Settings className="w-5 h-5" />
+          <span>Selecionar Categorias</span>
+          {!isPremium && <Crown className="w-4 h-4" />}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-500">
-            Escolha as Categorias do Sorteio
-          </DialogTitle>
+      <DialogContent className="max-w-3xl max-h-[85vh] overflow-hidden flex flex-col">
+        <DialogHeader className="flex-shrink-0">
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-500">
+              Escolha as Categorias do Sorteio
+            </DialogTitle>
+            <Button
+              onClick={() => setIsOpen(false)}
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 rounded-full hover:bg-gray-100"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </Button>
+          </div>
         </DialogHeader>
 
-        {isPremium ? (
-          <div className="space-y-4">
-            <div className="flex gap-2 justify-center">
-              <Button
-                onClick={selectAll}
-                className="h-10 px-6 rounded-xl bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 font-bold"
-              >
-                Selecionar Todas
-              </Button>
-              <Button
-                onClick={deselectAll}
-                className="h-10 px-6 rounded-xl bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 font-bold"
-              >
-                Desmarcar Todas
-              </Button>
+        <div className="flex-1 overflow-y-auto pr-2">
+          {isPremium ? (
+            <div className="space-y-4">
+              <div className="flex gap-2 justify-center">
+                <Button
+                  onClick={selectAll}
+                  className="h-10 px-6 rounded-xl bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 font-bold"
+                >
+                  Selecionar Todas
+                </Button>
+                <Button
+                  onClick={deselectAll}
+                  className="h-10 px-6 rounded-xl bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 font-bold"
+                >
+                  Desmarcar Todas
+                </Button>
+              </div>
+
+              <p className="text-gray-600 font-bold text-center">
+                Selecione as categorias que deseja incluir no sorteio de temas
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {availableCategories.map((category) => {
+                  const isSelected = selectedCategories.includes(category)
+                  
+                  return (
+                    <button
+                      key={category}
+                      onClick={() => toggleCategory(category)}
+                      className={`p-4 rounded-2xl border-4 transition-all text-left ${
+                        isSelected
+                          ? 'bg-gradient-to-r from-cyan-100 to-blue-100 border-cyan-400 shadow-lg scale-105'
+                          : 'bg-white border-gray-200 hover:border-cyan-300'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-black text-gray-800">
+                          {category}
+                        </h3>
+                        {isSelected && (
+                          <div className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white p-1.5 rounded-full">
+                            <Check className="w-4 h-4" />
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+
+              <div className="text-center pt-4 border-t-2 border-gray-200">
+                <p className="text-sm font-bold text-gray-600">
+                  ✨ {selectedCategories.length} de {availableCategories.length} categoria(s) selecionada(s)
+                </p>
+              </div>
             </div>
-
-            <p className="text-gray-600 font-bold text-center">
-              Selecione as categorias que deseja incluir no sorteio de temas
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {availableCategories.map((category) => {
-                const isSelected = selectedCategories.includes(category)
-                
-                return (
-                  <button
-                    key={category}
-                    onClick={() => toggleCategory(category)}
-                    className={`p-4 rounded-2xl border-4 transition-all text-left ${
-                      isSelected
-                        ? 'bg-gradient-to-r from-cyan-100 to-blue-100 border-cyan-400 shadow-lg scale-105'
-                        : 'bg-white border-gray-200 hover:border-cyan-300'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
+          ) : (
+            <div className="text-center py-8 relative">
+              {/* Conteúdo desfocado/borrado */}
+              <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 rounded-2xl"></div>
+              
+              {/* Preview borrado das categorias */}
+              <div className="opacity-30 blur-sm pointer-events-none mb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {availableCategories.slice(0, 6).map((category) => (
+                    <div
+                      key={category}
+                      className="p-4 rounded-2xl border-4 bg-gradient-to-r from-cyan-100 to-blue-100 border-cyan-400"
+                    >
                       <h3 className="text-lg font-black text-gray-800">
                         {category}
                       </h3>
-                      {isSelected && (
-                        <div className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white p-1.5 rounded-full">
-                          <Check className="w-4 h-4" />
-                        </div>
-                      )}
                     </div>
-                  </button>
-                )
-              })}
-            </div>
+                  ))}
+                </div>
+              </div>
 
-            <div className="text-center pt-4 border-t-2 border-gray-200">
-              <p className="text-sm font-bold text-gray-600">
-                ✨ {selectedCategories.length} de {availableCategories.length} categoria(s) selecionada(s)
-              </p>
-            </div>
-          </div>
-        ) : (
-          <div className="text-center py-8">
-            <div className="mb-6">
-              <div className="inline-block p-6 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full">
-                <Crown className="w-16 h-16 text-orange-500" />
+              {/* Conteúdo premium sobreposto */}
+              <div className="relative z-20">
+                <div className="mb-6">
+                  <div className="inline-block p-6 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full">
+                    <Crown className="w-16 h-16 text-orange-500" />
+                  </div>
+                </div>
+                <h3 className="text-2xl font-black text-gray-800 mb-4">
+                  Recurso Exclusivo Premium
+                </h3>
+                <p className="text-gray-600 font-bold mb-6 max-w-md mx-auto">
+                  Com o Premium, você pode escolher exatamente quais categorias deseja que apareçam no sorteio de temas!
+                </p>
+                <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-2xl p-6 mb-6 max-w-md mx-auto">
+                  <p className="text-sm font-bold text-gray-700 mb-3">
+                    ✨ Benefícios:
+                  </p>
+                  <ul className="text-left text-sm font-semibold text-gray-600 space-y-2">
+                    <li>✓ Escolha categorias específicas</li>
+                    <li>✓ Personalize seus sorteios</li>
+                    <li>✓ Combine com pacotes premium</li>
+                    <li>✓ Controle total sobre os temas</li>
+                  </ul>
+                </div>
+                <Button
+                  onClick={() => {
+                    setIsOpen(false)
+                    onPremiumClick?.()
+                  }}
+                  className="h-14 px-8 rounded-2xl bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 font-black text-lg shadow-lg"
+                >
+                  <Crown className="w-5 h-5 mr-2" />
+                  Assinar Premium
+                </Button>
               </div>
             </div>
-            <h3 className="text-2xl font-black text-gray-800 mb-4">
-              Recurso Exclusivo Premium
-            </h3>
-            <p className="text-gray-600 font-bold mb-6 max-w-md mx-auto">
-              Com o Premium, você pode escolher exatamente quais categorias deseja que apareçam no sorteio de temas!
-            </p>
-            <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-2xl p-6 mb-6 max-w-md mx-auto">
-              <p className="text-sm font-bold text-gray-700 mb-3">
-                ✨ Benefícios:
-              </p>
-              <ul className="text-left text-sm font-semibold text-gray-600 space-y-2">
-                <li>✓ Escolha categorias específicas</li>
-                <li>✓ Personalize seus sorteios</li>
-                <li>✓ Combine com pacotes premium</li>
-                <li>✓ Controle total sobre os temas</li>
-              </ul>
-            </div>
-            <Button
-              className="h-14 px-8 rounded-2xl bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 font-black text-lg shadow-lg"
-            >
-              <Crown className="w-5 h-5 mr-2" />
-              Assinar Premium
-            </Button>
-          </div>
-        )}
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   )

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Clock, Sparkles, RotateCcw, LogOut, Plus, History, Trophy, Users, X, Award, Play, Pause, Settings, Trash2, Crown } from 'lucide-react'
+import { Clock, Sparkles, RotateCcw, LogOut, Plus, History, Trophy, Users, X, Award, Play, Pause, Settings, Trash2, Crown, HelpCircle } from 'lucide-react'
 import { ThemeSelector } from './ThemeSelector'
 import { ThemeManager } from './ThemeManager'
 import { HistoryPanel } from './HistoryPanel'
@@ -80,6 +80,9 @@ export function GameScreen({ username, onLogout, isGuestMode }: GameScreenProps)
   const [customTimeInput, setCustomTimeInput] = useState('')
   const [sameTimeForAll, setSameTimeForAll] = useState(false)
   const [sameTimeValue, setSameTimeValue] = useState(60)
+  
+  // Estado para modal de informação de tempos
+  const [showTimeInfo, setShowTimeInfo] = useState(false)
   
   const tickSoundRef = useRef<HTMLAudioElement | null>(null)
   const alarmSoundRef = useRef<HTMLAudioElement | null>(null)
@@ -456,13 +459,23 @@ export function GameScreen({ username, onLogout, isGuestMode }: GameScreenProps)
     }))
   }
 
+  const handlePremiumClick = () => {
+    if (isGuestMode) {
+      // Redirecionar para tela de login/cadastro
+      onLogout()
+    } else {
+      // Ativar premium
+      setIsPremium(true)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-300 via-pink-400 to-cyan-400 p-4 sm:p-6">
       {/* Header */}
       <div className="max-w-6xl mx-auto mb-6">
         <div className="bg-white rounded-3xl shadow-xl p-4 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="bg-gradient-to-br from-yellow-400 to-pink-500 p-4 rounded-3xl">
+            <div className="bg-gradient-to-br from-yellow-400 via-orange-500 to-pink-500 p-4 rounded-3xl shadow-lg">
               <Trophy className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
             </div>
             <div>
@@ -481,7 +494,7 @@ export function GameScreen({ username, onLogout, isGuestMode }: GameScreenProps)
           <div className="flex gap-2">
             {!isPremium && (
               <Button 
-                onClick={() => setIsPremium(true)}
+                onClick={handlePremiumClick}
                 className="h-12 px-6 rounded-2xl bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 font-bold text-base sm:text-lg"
               >
                 <Crown className="w-5 h-5 mr-2" />
@@ -567,6 +580,7 @@ export function GameScreen({ username, onLogout, isGuestMode }: GameScreenProps)
                   })}
                   selectedCategories={selectedCategories}
                   onCategoriesSelected={setSelectedCategories}
+                  onPremiumClick={handlePremiumClick}
                 />
 
                 {/* Funcionalidades Premium */}
@@ -574,11 +588,13 @@ export function GameScreen({ username, onLogout, isGuestMode }: GameScreenProps)
                   isPremium={isPremium}
                   onPacksSelected={setSelectedPremiumPacks}
                   selectedPacks={selectedPremiumPacks}
+                  onPremiumClick={handlePremiumClick}
                 />
 
                 <CustomThemeEditor
                   isPremium={isPremium}
                   onSaveCustomList={handleSaveCustomList}
+                  onPremiumClick={handlePremiumClick}
                 />
               </div>
             </div>
@@ -589,16 +605,67 @@ export function GameScreen({ username, onLogout, isGuestMode }: GameScreenProps)
                 isPremium={isPremium}
                 onChallengeGenerated={setExtraChallenge}
                 disabled={gameMode === 'playing'}
+                onPremiumClick={handlePremiumClick}
               />
             )}
 
             {/* Time Configuration */}
             {gameMode === 'setup' && (
               <div className="bg-white rounded-3xl shadow-xl p-6">
-                <h2 className="text-2xl font-black text-gray-800 mb-4 flex items-center gap-2">
-                  <Settings className="w-6 h-6 text-cyan-500" />
-                  Tempos Disponíveis
-                </h2>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-2xl font-black text-gray-800 flex items-center gap-2">
+                    <Settings className="w-6 h-6 text-cyan-500" />
+                    Tempos Disponíveis
+                  </h2>
+                  <Dialog open={showTimeInfo} onOpenChange={setShowTimeInfo}>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 rounded-full hover:bg-cyan-100"
+                      >
+                        <HelpCircle className="w-5 h-5 text-cyan-500" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-500">
+                          ⏱️ Guia de Tempos
+                        </DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-3">
+                        <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-2xl p-4 border-2 border-cyan-200">
+                          <p className="font-black text-gray-800 mb-2">30 segundos</p>
+                          <p className="text-sm text-gray-600 font-semibold">Desafio rápido e intenso!</p>
+                        </div>
+                        <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-2xl p-4 border-2 border-cyan-200">
+                          <p className="font-black text-gray-800 mb-2">1 minuto (60 segundos)</p>
+                          <p className="text-sm text-gray-600 font-semibold">Tempo padrão para desenhos simples</p>
+                        </div>
+                        <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-2xl p-4 border-2 border-cyan-200">
+                          <p className="font-black text-gray-800 mb-2">1 minuto e meio (90 segundos)</p>
+                          <p className="text-sm text-gray-600 font-semibold">Um pouco mais de tempo para detalhes</p>
+                        </div>
+                        <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-2xl p-4 border-2 border-cyan-200">
+                          <p className="font-black text-gray-800 mb-2">2 minutos (120 segundos)</p>
+                          <p className="text-sm text-gray-600 font-semibold">Tempo confortável para desenhos médios</p>
+                        </div>
+                        <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-2xl p-4 border-2 border-cyan-200">
+                          <p className="font-black text-gray-800 mb-2">3 minutos (180 segundos)</p>
+                          <p className="text-sm text-gray-600 font-semibold">Tempo generoso para mais detalhes</p>
+                        </div>
+                        <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-2xl p-4 border-2 border-cyan-200">
+                          <p className="font-black text-gray-800 mb-2">5 minutos (300 segundos)</p>
+                          <p className="text-sm text-gray-600 font-semibold">Tempo extenso para desenhos elaborados</p>
+                        </div>
+                        <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-4 border-2 border-purple-200">
+                          <p className="font-black text-gray-800 mb-2">💡 Dica</p>
+                          <p className="text-sm text-gray-600 font-semibold">Você pode adicionar tempos personalizados em segundos!</p>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
                 
                 {/* Opção de tempo igual para todos */}
                 <div className="mb-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border-2 border-purple-200">
