@@ -3,22 +3,30 @@ import { supabase, isSupabaseConfigured } from './supabase'
 // Função para fazer login
 export async function signIn(email: string, password: string) {
   if (!isSupabaseConfigured()) {
-    throw new Error('Supabase não está configurado')
+    throw new Error('SUPABASE_NOT_CONFIGURED')
   }
   
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  })
-  
-  if (error) throw error
-  return data
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+    
+    if (error) throw error
+    return data
+  } catch (error: any) {
+    // Melhor tratamento de erros de rede
+    if (error.message?.includes('Failed to fetch') || error.message?.includes('NetworkError')) {
+      throw new Error('NETWORK_ERROR')
+    }
+    throw error
+  }
 }
 
 // Função para criar conta
 export async function signUp(email: string, password: string, name: string) {
   if (!isSupabaseConfigured()) {
-    throw new Error('Supabase não está configurado')
+    throw new Error('SUPABASE_NOT_CONFIGURED')
   }
   
   try {
@@ -30,8 +38,6 @@ export async function signUp(email: string, password: string, name: string) {
           name: name,
         },
         emailRedirectTo: `${window.location.origin}/auth/callback`,
-        // Desabilita confirmação de email para facilitar o uso
-        // Em produção, você pode habilitar isso no dashboard do Supabase
       },
     })
     
@@ -48,6 +54,10 @@ export async function signUp(email: string, password: string, name: string) {
     return data
   } catch (error: any) {
     console.error('Erro ao criar conta:', error)
+    // Melhor tratamento de erros de rede
+    if (error.message?.includes('Failed to fetch') || error.message?.includes('NetworkError')) {
+      throw new Error('NETWORK_ERROR')
+    }
     throw error
   }
 }
@@ -65,21 +75,28 @@ export async function signOut() {
 // Função para recuperar senha
 export async function resetPassword(email: string) {
   if (!isSupabaseConfigured()) {
-    throw new Error('Supabase não está configurado')
+    throw new Error('SUPABASE_NOT_CONFIGURED')
   }
   
-  const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/auth/reset-password`,
-  })
-  
-  if (error) throw error
-  return data
+  try {
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/reset-password`,
+    })
+    
+    if (error) throw error
+    return data
+  } catch (error: any) {
+    if (error.message?.includes('Failed to fetch') || error.message?.includes('NetworkError')) {
+      throw new Error('NETWORK_ERROR')
+    }
+    throw error
+  }
 }
 
 // Função para atualizar senha
 export async function updatePassword(newPassword: string) {
   if (!isSupabaseConfigured()) {
-    throw new Error('Supabase não está configurado')
+    throw new Error('SUPABASE_NOT_CONFIGURED')
   }
   
   const { data, error } = await supabase.auth.updateUser({

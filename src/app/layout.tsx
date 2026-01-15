@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Criado com a Lasy",
-  description: "Projeto criado com Lasy AI",
+  title: "Speed Drawing",
+  description: "Desafio de desenho rápido com cronômetro",
 };
 
 export default function RootLayout({
