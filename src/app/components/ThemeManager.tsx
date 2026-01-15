@@ -4,18 +4,20 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Settings, Plus, Trash2, Edit2, Save, X } from 'lucide-react'
+import { Settings, Plus, Trash2, Edit2, Save, X, Crown } from 'lucide-react'
 import { saveUserThemes, loadUserThemes, getDefaultThemes } from '@/lib/database'
 import { getCurrentUser } from '@/lib/auth'
+import { PremiumBadge } from './PremiumBadge'
 
 const DEFAULT_THEMES = getDefaultThemes()
 
 interface ThemeManagerProps {
   onThemesUpdate: (themes: Record<string, string[]>) => void
   isGuestMode?: boolean
+  isPremium?: boolean
 }
 
-export function ThemeManager({ onThemesUpdate, isGuestMode = false }: ThemeManagerProps) {
+export function ThemeManager({ onThemesUpdate, isGuestMode = false, isPremium = false }: ThemeManagerProps) {
   const [themes, setThemes] = useState<Record<string, string[]>>(DEFAULT_THEMES)
   const [selectedCategory, setSelectedCategory] = useState<string>('Animais')
   const [newTheme, setNewTheme] = useState('')
@@ -83,6 +85,12 @@ export function ThemeManager({ onThemesUpdate, isGuestMode = false }: ThemeManag
     }
   }
 
+  // Contar categorias customizadas (não padrão)
+  const countCustomCategories = () => {
+    const defaultCategories = Object.keys(DEFAULT_THEMES)
+    return Object.keys(themes).filter(cat => !defaultCategories.includes(cat)).length
+  }
+
   const handleAddTheme = () => {
     if (!newTheme.trim()) return
     
@@ -130,6 +138,16 @@ export function ThemeManager({ onThemesUpdate, isGuestMode = false }: ThemeManag
   const handleAddCategory = () => {
     if (!newCategory.trim() || themes[newCategory.trim()]) return
     
+    // LIMITE PLANO GRATUITO: máximo 3 categorias customizadas
+    if (!isPremium && countCustomCategories() >= 3) {
+      const alertDiv = document.createElement('div')
+      alertDiv.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-orange-500 text-white px-6 py-3 rounded-2xl font-bold shadow-lg z-50 animate-bounce'
+      alertDiv.innerHTML = '👑 Plano gratuito: máximo 3 categorias customizadas. Assine Premium para ilimitado!'
+      document.body.appendChild(alertDiv)
+      setTimeout(() => alertDiv.remove(), 3000)
+      return
+    }
+    
     const updatedThemes = {
       ...themes,
       [newCategory.trim()]: []
@@ -153,6 +171,9 @@ export function ThemeManager({ onThemesUpdate, isGuestMode = false }: ThemeManag
       setSelectedCategory('Animais')
     }
   }
+
+  const customCategoriesCount = countCustomCategories()
+  const isCustomCategory = !Object.keys(DEFAULT_THEMES).includes(selectedCategory)
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -180,10 +201,33 @@ export function ThemeManager({ onThemesUpdate, isGuestMode = false }: ThemeManag
           </div>
         )}
 
+        {!isPremium && !isGuestMode && (
+          <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-orange-300 rounded-2xl p-4 mb-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-orange-800 font-bold">
+                  📊 Plano Gratuito: {customCategoriesCount}/3 categorias customizadas
+                </p>
+                <p className="text-sm text-orange-700 font-semibold mt-1">
+                  Assine Premium para categorias ilimitadas!
+                </p>
+              </div>
+              <PremiumBadge />
+            </div>
+          </div>
+        )}
+
         <div className="space-y-6">
           {/* Adicionar Nova Categoria */}
           <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl p-4 border-2 border-purple-200">
-            <h3 className="text-lg font-bold text-gray-800 mb-3">➕ Adicionar Nova Categoria</h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-bold text-gray-800">➕ Adicionar Nova Categoria</h3>
+              {!isPremium && (
+                <span className="text-xs font-bold text-orange-600 bg-orange-100 px-2 py-1 rounded-full">
+                  {customCategoriesCount}/3 usadas
+                </span>
+              )}
+            </div>
             <div className="flex gap-2">
               <Input
                 type="text"
@@ -208,28 +252,34 @@ export function ThemeManager({ onThemesUpdate, isGuestMode = false }: ThemeManag
           <div>
             <h3 className="text-lg font-bold text-gray-800 mb-3">📂 Selecione uma Categoria</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {Object.keys(themes).map((category) => (
-                <div key={category} className="relative group">
-                  <Button
-                    onClick={() => setSelectedCategory(category)}
-                    className={`w-full h-12 rounded-xl font-bold transition-all ${
-                      selectedCategory === category
-                        ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
-                  >
-                    {category}
-                  </Button>
-                  {Object.keys(themes).length > 1 && !isGuestMode && (
+              {Object.keys(themes).map((category) => {
+                const isDefault = Object.keys(DEFAULT_THEMES).includes(category)
+                return (
+                  <div key={category} className="relative group">
                     <Button
-                      onClick={() => handleRemoveCategory(category)}
-                      className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full bg-red-500 hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => setSelectedCategory(category)}
+                      className={`w-full h-12 rounded-xl font-bold transition-all ${
+                        selectedCategory === category
+                          ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
                     >
-                      <X className="w-3 h-3 text-white" />
+                      {category}
+                      {!isDefault && (
+                        <span className="ml-1 text-xs">✨</span>
+                      )}
                     </Button>
-                  )}
-                </div>
-              ))}
+                    {!isDefault && !isGuestMode && (
+                      <Button
+                        onClick={() => handleRemoveCategory(category)}
+                        className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full bg-red-500 hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="w-3 h-3 text-white" />
+                      </Button>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </div>
 

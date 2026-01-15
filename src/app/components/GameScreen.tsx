@@ -4,11 +4,15 @@ import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Clock, Sparkles, RotateCcw, LogOut, Plus, History, Trophy, Users, X, Award, Play, Pause, Settings, Trash2 } from 'lucide-react'
+import { Clock, Sparkles, RotateCcw, LogOut, Plus, History, Trophy, Users, X, Award, Play, Pause, Settings, Trash2, Crown } from 'lucide-react'
 import { ThemeSelector } from './ThemeSelector'
 import { ThemeManager } from './ThemeManager'
 import { HistoryPanel } from './HistoryPanel'
 import { Checkbox } from '@/components/ui/checkbox'
+import { ChallengeWheel } from './ChallengeWheel'
+import { PremiumThemePacks } from './PremiumThemePacks'
+import { CustomThemeEditor } from './CustomThemeEditor'
+import { PremiumBadge } from './PremiumBadge'
 
 interface GameScreenProps {
   username: string
@@ -23,6 +27,7 @@ interface Challenge {
   playerName: string
   timestamp: number
   allPlayers?: { name: string; position: number; time: number }[]
+  extraChallenge?: string
 }
 
 interface Player {
@@ -48,6 +53,9 @@ export function GameScreen({ username, onLogout, isGuestMode }: GameScreenProps)
   const [isPaused, setIsPaused] = useState(false)
   const [challenges, setChallenges] = useState<Challenge[]>([])
   
+  // Estado Premium (simulado - em produção viria do backend)
+  const [isPremium, setIsPremium] = useState(false)
+  
   // Novos estados para múltiplos jogadores
   const [gameMode, setGameMode] = useState<'setup' | 'playing' | 'ranking'>('setup')
   const [players, setPlayers] = useState<Player[]>([])
@@ -58,6 +66,11 @@ export function GameScreen({ username, onLogout, isGuestMode }: GameScreenProps)
   
   // Estado para temas customizados
   const [customThemes, setCustomThemes] = useState<Record<string, string[]> | undefined>(undefined)
+  
+  // Estados para funcionalidades premium
+  const [extraChallenge, setExtraChallenge] = useState<string | null>(null)
+  const [selectedPremiumPacks, setSelectedPremiumPacks] = useState<string[]>([])
+  const [customThemeLists, setCustomThemeLists] = useState<Record<string, string[]>>({})
   
   // Novos estados para configuração de tempos
   const [availableTimes, setAvailableTimes] = useState<number[]>([60, 120, 300])
@@ -97,6 +110,16 @@ export function GameScreen({ username, onLogout, isGuestMode }: GameScreenProps)
       alarmSoundRef.current = alarmAudio
     }
   }, [username, isGuestMode])
+
+  // Combinar temas customizados com listas personalizadas
+  useEffect(() => {
+    if (Object.keys(customThemeLists).length > 0) {
+      setCustomThemes(prev => ({
+        ...prev,
+        ...customThemeLists
+      }))
+    }
+  }, [customThemeLists])
 
   // Atualizar tempos dos jogadores quando availableTimes ou sameTimeForAll mudar
   useEffect(() => {
@@ -322,6 +345,7 @@ export function GameScreen({ username, onLogout, isGuestMode }: GameScreenProps)
     setGameMode('setup')
     setShowRanking(false)
     setFinishedPlayers(new Set())
+    setExtraChallenge(null)
     lastWarningTimeRef.current.clear()
     // Scroll para o topo ao reiniciar
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -361,7 +385,8 @@ export function GameScreen({ username, onLogout, isGuestMode }: GameScreenProps)
           name: p.name,
           position: p.position || 0,
           time: p.time
-        }))
+        })),
+        extraChallenge: extraChallenge || undefined
       }
       
       const updated = [newChallenge, ...challenges]
@@ -422,6 +447,13 @@ export function GameScreen({ username, onLogout, isGuestMode }: GameScreenProps)
     return 'text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-600'
   }
 
+  const handleSaveCustomList = (categoryName: string, themes: string[]) => {
+    setCustomThemeLists(prev => ({
+      ...prev,
+      [categoryName]: themes
+    }))
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-300 via-pink-400 to-cyan-400 p-4 sm:p-6">
       {/* Header */}
@@ -435,13 +467,26 @@ export function GameScreen({ username, onLogout, isGuestMode }: GameScreenProps)
               <h1 className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-cyan-500">
                 Speed Drawing
               </h1>
-              <p className="text-sm sm:text-base text-gray-600 font-bold">
-                Olá, {username}! {isGuestMode && '(Modo Visitante)'}
-              </p>
+              <div className="flex items-center gap-2">
+                <p className="text-sm sm:text-base text-gray-600 font-bold">
+                  Olá, {username}! {isGuestMode && '(Modo Visitante)'}
+                </p>
+                {isPremium && <PremiumBadge size="sm" />}
+              </div>
             </div>
           </div>
           
           <div className="flex gap-2">
+            {!isPremium && (
+              <Button 
+                onClick={() => setIsPremium(true)}
+                className="h-12 px-6 rounded-2xl bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 font-bold text-base sm:text-lg"
+              >
+                <Crown className="w-5 h-5 mr-2" />
+                Assinar Premium
+              </Button>
+            )}
+
             {!isGuestMode && (
               <Dialog>
                 <DialogTrigger asChild>
@@ -486,15 +531,42 @@ export function GameScreen({ username, onLogout, isGuestMode }: GameScreenProps)
               </h2>
               
               <div className="space-y-3">
-                <ThemeManager onThemesUpdate={setCustomThemes} />
+                <ThemeManager 
+                  onThemesUpdate={setCustomThemes} 
+                  isGuestMode={isGuestMode}
+                  isPremium={isPremium}
+                />
                 
                 <ThemeSelector
                   onThemeSelected={setCurrentTheme}
                   disabled={gameMode === 'playing'}
                   customThemes={customThemes}
+                  isPremium={isPremium}
+                  selectedPremiumPacks={selectedPremiumPacks}
+                />
+
+                {/* Funcionalidades Premium */}
+                <PremiumThemePacks
+                  isPremium={isPremium}
+                  onPacksSelected={setSelectedPremiumPacks}
+                  selectedPacks={selectedPremiumPacks}
+                />
+
+                <CustomThemeEditor
+                  isPremium={isPremium}
+                  onSaveCustomList={handleSaveCustomList}
                 />
               </div>
             </div>
+
+            {/* Challenge Wheel (Premium) */}
+            {gameMode === 'setup' && (
+              <ChallengeWheel
+                isPremium={isPremium}
+                onChallengeGenerated={setExtraChallenge}
+                disabled={gameMode === 'playing'}
+              />
+            )}
 
             {/* Time Configuration */}
             {gameMode === 'setup' && (
@@ -714,6 +786,21 @@ export function GameScreen({ username, onLogout, isGuestMode }: GameScreenProps)
                     <h3 className="text-4xl sm:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 via-pink-500 to-cyan-500 animate-pulse">
                       {currentTheme.text}
                     </h3>
+                    
+                    {/* Extra Challenge Display (Premium) */}
+                    {extraChallenge && (
+                      <div className="mt-6 inline-block">
+                        <div className="bg-gradient-to-r from-orange-100 to-red-100 border-4 border-orange-400 rounded-2xl px-6 py-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Crown className="w-5 h-5 text-orange-600" />
+                            <span className="text-sm font-black text-orange-600 uppercase">Desafio Extra</span>
+                          </div>
+                          <p className="text-2xl font-black text-gray-800">
+                            {extraChallenge}
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 

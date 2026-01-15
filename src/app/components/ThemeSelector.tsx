@@ -3,11 +3,14 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Sparkles } from 'lucide-react'
+import { PREMIUM_THEME_PACKS } from './PremiumThemePacks'
 
 interface ThemeSelectorProps {
   onThemeSelected: (theme: { text: string; category: string }) => void
   disabled?: boolean
   customThemes?: Record<string, string[]>
+  isPremium?: boolean
+  selectedPremiumPacks?: string[]
 }
 
 const DEFAULT_THEMES = {
@@ -53,15 +56,31 @@ const DEFAULT_THEMES = {
   ]
 }
 
-export function ThemeSelector({ onThemeSelected, disabled, customThemes }: ThemeSelectorProps) {
+export function ThemeSelector({ onThemeSelected, disabled, customThemes, isPremium = false, selectedPremiumPacks = [] }: ThemeSelectorProps) {
   const [isGenerating, setIsGenerating] = useState(false)
   const [themes, setThemes] = useState(DEFAULT_THEMES)
 
   useEffect(() => {
+    // Combinar temas padrão + customizados + pacotes premium selecionados
+    let combinedThemes = { ...DEFAULT_THEMES }
+
+    // Adicionar temas customizados (sempre disponível)
     if (customThemes) {
-      setThemes(customThemes)
+      combinedThemes = { ...combinedThemes, ...customThemes }
     }
-  }, [customThemes])
+
+    // Adicionar pacotes premium selecionados (apenas se premium)
+    if (isPremium && selectedPremiumPacks.length > 0) {
+      selectedPremiumPacks.forEach(packName => {
+        const packThemes = PREMIUM_THEME_PACKS[packName as keyof typeof PREMIUM_THEME_PACKS]
+        if (packThemes) {
+          combinedThemes[packName] = packThemes
+        }
+      })
+    }
+
+    setThemes(combinedThemes)
+  }, [customThemes, isPremium, selectedPremiumPacks])
 
   const generateTheme = () => {
     setIsGenerating(true)
@@ -111,7 +130,7 @@ export function ThemeSelector({ onThemeSelected, disabled, customThemes }: Theme
       </Button>
       
       <p className="text-sm text-gray-600 font-bold mt-4 text-center">
-        ✨ Clique para sortear um tema aleatório
+        ✨ {Object.keys(themes).length} categorias disponíveis
       </p>
     </>
   )
