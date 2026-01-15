@@ -40,6 +40,7 @@ export function ChallengeWheel({ isPremium, onChallengeGenerated, disabled, onPr
   const [isSpinning, setIsSpinning] = useState(false)
   const [currentChallenge, setCurrentChallenge] = useState<string | null>(null)
   const [showPremiumModal, setShowPremiumModal] = useState(false)
+  const [showAccountModal, setShowAccountModal] = useState(false)
 
   const spinWheel = () => {
     if (!isPremium) {
@@ -63,6 +64,16 @@ export function ChallengeWheel({ isPremium, onChallengeGenerated, disabled, onPr
         onChallengeGenerated(randomChallenge)
       }
     }, 100)
+  }
+
+  const handlePremiumClick = () => {
+    setShowPremiumModal(false)
+    setShowAccountModal(true)
+  }
+
+  const handleCreateAccount = () => {
+    setShowAccountModal(false)
+    onPremiumClick?.()
   }
 
   return (
@@ -109,7 +120,7 @@ export function ChallengeWheel({ isPremium, onChallengeGenerated, disabled, onPr
             </p>
           </>
         ) : (
-          <div className="text-center py-6 relative">
+          <div className="text-center py-4 relative">
             {/* Conteúdo desfocado/borrado */}
             <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 rounded-2xl"></div>
             
@@ -125,15 +136,15 @@ export function ChallengeWheel({ isPremium, onChallengeGenerated, disabled, onPr
 
             {/* Conteúdo premium sobreposto */}
             <div className="relative z-20">
-              <div className="mb-4">
-                <div className="inline-block p-4 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full">
-                  <Crown className="w-12 h-12 text-orange-500" />
+              <div className="mb-3">
+                <div className="inline-block p-3 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full">
+                  <Crown className="w-10 h-10 text-orange-500" />
                 </div>
               </div>
-              <p className="text-gray-600 font-bold mb-4">
+              <p className="text-gray-600 font-bold mb-3">
                 Desbloqueie desafios extras como:
               </p>
-              <div className="space-y-2 text-sm font-semibold text-gray-700">
+              <div className="space-y-1 text-sm font-semibold text-gray-700 mb-4">
                 <p>🎨 "com a mão esquerda"</p>
                 <p>👁️ "de olhos vendados"</p>
                 <p>🎯 "usando apenas 3 cores"</p>
@@ -143,7 +154,7 @@ export function ChallengeWheel({ isPremium, onChallengeGenerated, disabled, onPr
                 onClick={() => {
                   setShowPremiumModal(true)
                 }}
-                className="mt-6 h-12 px-6 rounded-2xl bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 font-black shadow-lg"
+                className="h-12 px-6 rounded-2xl bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 font-black shadow-lg"
               >
                 <Crown className="w-5 h-5 mr-2" />
                 Assinar Premium
@@ -173,23 +184,23 @@ export function ChallengeWheel({ isPremium, onChallengeGenerated, disabled, onPr
           </DialogHeader>
 
           <div className="flex-1 overflow-y-auto pr-2">
-            <div className="text-center py-6">
-              <div className="mb-6">
-                <div className="inline-block p-6 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full">
-                  <Crown className="w-16 h-16 text-orange-500" />
+            <div className="text-center py-4">
+              <div className="mb-4">
+                <div className="inline-block p-4 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full">
+                  <Crown className="w-12 h-12 text-orange-500" />
                 </div>
               </div>
-              <h3 className="text-2xl font-black text-gray-800 mb-4">
+              <h3 className="text-2xl font-black text-gray-800 mb-3">
                 Desafios Extras Exclusivos
               </h3>
-              <p className="text-gray-600 font-bold mb-6 max-w-md mx-auto">
+              <p className="text-gray-600 font-bold mb-4 max-w-md mx-auto">
                 Adicione um nível extra de dificuldade aos seus desenhos com mais de 20 desafios diferentes!
               </p>
-              <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-2xl p-6 mb-6 max-w-md mx-auto">
-                <p className="text-sm font-bold text-gray-700 mb-3">
+              <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-2xl p-4 mb-4 max-w-md mx-auto">
+                <p className="text-sm font-bold text-gray-700 mb-2">
                   ✨ Exemplos de desafios:
                 </p>
-                <ul className="text-left text-sm font-semibold text-gray-600 space-y-2">
+                <ul className="text-left text-sm font-semibold text-gray-600 space-y-1">
                   <li>🎨 Com a mão não dominante</li>
                   <li>👁️ De olhos vendados</li>
                   <li>🎯 Usando apenas 3 cores</li>
@@ -199,16 +210,65 @@ export function ChallengeWheel({ isPremium, onChallengeGenerated, disabled, onPr
                 </ul>
               </div>
               <Button
-                onClick={() => {
-                  setShowPremiumModal(false)
-                  onPremiumClick?.()
-                }}
+                onClick={handlePremiumClick}
                 className="h-14 px-8 rounded-2xl bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 font-black text-lg shadow-lg"
               >
                 <Crown className="w-5 h-5 mr-2" />
                 Assinar Premium
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Criação de Conta */}
+      <Dialog open={showAccountModal} onOpenChange={setShowAccountModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-orange-500">
+                Criar Conta
+              </DialogTitle>
+              <Button
+                onClick={() => setShowAccountModal(false)}
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0 rounded-full hover:bg-gray-100"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </Button>
+            </div>
+          </DialogHeader>
+
+          <div className="text-center py-6">
+            <div className="mb-6">
+              <div className="inline-block p-6 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full">
+                <Crown className="w-16 h-16 text-orange-500" />
+              </div>
+            </div>
+            <h3 className="text-2xl font-black text-gray-800 mb-4">
+              Premium Exclusivo
+            </h3>
+            <p className="text-gray-600 font-bold mb-6 max-w-sm mx-auto">
+              Para assinar o plano Premium, você precisa criar uma conta no Speed Drawing!
+            </p>
+            <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 mb-6">
+              <p className="text-sm font-bold text-gray-700 mb-3">
+                ✨ Com uma conta você terá:
+              </p>
+              <ul className="text-left text-sm font-semibold text-gray-600 space-y-2">
+                <li>💾 Histórico de desafios salvos</li>
+                <li>👥 Perfil personalizado</li>
+                <li>🏆 Estatísticas e conquistas</li>
+                <li>👑 Acesso ao Premium</li>
+              </ul>
+            </div>
+            <Button
+              onClick={handleCreateAccount}
+              className="w-full h-14 rounded-2xl bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 font-black text-lg shadow-lg"
+            >
+              Criar Conta Agora
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
