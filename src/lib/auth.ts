@@ -21,19 +21,35 @@ export async function signUp(email: string, password: string, name: string) {
     throw new Error('Supabase não está configurado')
   }
   
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: {
-        name: name,
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name: name,
+        },
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        // Desabilita confirmação de email para facilitar o uso
+        // Em produção, você pode habilitar isso no dashboard do Supabase
       },
-      emailRedirectTo: `${window.location.origin}/auth/callback`,
-    },
-  })
-  
-  if (error) throw error
-  return data
+    })
+    
+    if (error) {
+      console.error('Erro do Supabase:', error)
+      throw error
+    }
+    
+    // Verificar se o usuário foi criado
+    if (!data.user) {
+      throw new Error('Não foi possível criar a conta')
+    }
+    
+    return data
+  } catch (error: any) {
+    console.error('Erro ao criar conta:', error)
+    throw error
+  }
 }
 
 // Função para fazer logout

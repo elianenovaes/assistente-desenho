@@ -102,17 +102,22 @@ export default function Home() {
 
     try {
       const data = await signIn(email, password)
+      console.log('Login bem-sucedido:', data)
       setUsername(data.user?.user_metadata?.name || data.user?.email || 'Usuário')
       setIsLoggedIn(true)
       setIsGuestMode(false)
       setErrorMessage('')
     } catch (error: any) {
-      if (error.message.includes('Invalid login credentials')) {
+      console.error('Erro detalhado ao fazer login:', error)
+      
+      if (error.message?.includes('Invalid login credentials')) {
         setErrorMessage('Email ou senha incorretos')
-      } else if (error.message.includes('Email not confirmed')) {
+      } else if (error.message?.includes('Email not confirmed')) {
         setErrorMessage('Por favor, confirme seu email antes de fazer login')
+      } else if (error.message?.includes('Supabase não está configurado')) {
+        setErrorMessage('Serviço temporariamente indisponível. Tente novamente em alguns instantes.')
       } else {
-        setErrorMessage('Erro ao fazer login. Tente novamente.')
+        setErrorMessage(`Erro ao fazer login: ${error.message || 'Tente novamente.'}`)
       }
     } finally {
       setIsLoading(false)
@@ -164,7 +169,9 @@ export default function Home() {
     }
 
     try {
-      await signUp(signupEmail, signupPassword, signupName)
+      const result = await signUp(signupEmail, signupPassword, signupName)
+      
+      console.log('Resultado do signup:', result)
       
       // Mostra mensagem de sucesso
       setSuccessMessage('Conta criada com sucesso! Verifique seu email para confirmar sua conta.')
@@ -178,10 +185,21 @@ export default function Home() {
       setSignupPassword('')
       setSignupConfirmPassword('')
     } catch (error: any) {
-      if (error.message.includes('already registered')) {
+      console.error('Erro detalhado ao criar conta:', error)
+      
+      // Tratamento de erros específicos do Supabase
+      if (error.message?.includes('User already registered')) {
         setErrorMessage('Este email já está cadastrado. Faça login.')
+      } else if (error.message?.includes('Email rate limit exceeded')) {
+        setErrorMessage('Muitas tentativas. Aguarde alguns minutos e tente novamente.')
+      } else if (error.message?.includes('Invalid email')) {
+        setErrorMessage('Email inválido. Verifique e tente novamente.')
+      } else if (error.message?.includes('Password should be at least')) {
+        setErrorMessage('A senha deve ter no mínimo 6 caracteres.')
+      } else if (error.message?.includes('Supabase não está configurado')) {
+        setErrorMessage('Serviço temporariamente indisponível. Tente novamente em alguns instantes.')
       } else {
-        setErrorMessage('Erro ao criar conta. Tente novamente.')
+        setErrorMessage(`Erro ao criar conta: ${error.message || 'Tente novamente.'}`)
       }
     } finally {
       setIsLoading(false)
