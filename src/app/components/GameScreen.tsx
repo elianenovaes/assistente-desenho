@@ -460,8 +460,8 @@ export function GameScreen({ username, onLogout, isGuestMode }: GameScreenProps)
       <div className="max-w-6xl mx-auto mb-6">
         <div className="bg-white rounded-3xl shadow-xl p-4 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="bg-gradient-to-br from-yellow-400 to-pink-500 p-3 rounded-2xl">
-              <Trophy className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+            <div className="bg-gradient-to-br from-yellow-400 to-pink-500 p-4 rounded-3xl">
+              <Trophy className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-cyan-500">
