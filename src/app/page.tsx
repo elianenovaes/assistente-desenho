@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { GameScreen } from './components/GameScreen'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Trophy, UserPlus, LogIn, Mail, Lock, AlertCircle, User, ArrowLeft, Eye, EyeOff, KeyRound } from 'lucide-react'
+import { Trophy, UserPlus, LogIn, Mail, Lock, AlertCircle, User, ArrowLeft, Eye, EyeOff, KeyRound, RefreshCw } from 'lucide-react'
 import { signIn, signUp, signOut, resetPassword, getCurrentUser } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import { clearLocalData } from '@/lib/database'
@@ -119,7 +119,7 @@ export default function Home() {
       console.error('Erro detalhado ao fazer login:', error)
       
       if (error.message === 'SUPABASE_NOT_CONFIGURED') {
-        setErrorMessage('⚠️ Banco de dados não configurado. Use o modo visitante para testar o app ou configure o Supabase nas integrações.')
+        setErrorMessage('⚠️ Banco de dados não está carregado. Clique no botão abaixo para recarregar a página.')
       } else if (error.message === 'NETWORK_ERROR') {
         setErrorMessage('❌ Erro de conexão. Verifique sua internet e tente novamente.')
       } else if (error.message?.includes('Invalid login credentials')) {
@@ -199,7 +199,7 @@ export default function Home() {
       
       // Tratamento de erros específicos do Supabase
       if (error.message === 'SUPABASE_NOT_CONFIGURED') {
-        setErrorMessage('⚠️ Banco de dados não configurado. Use o modo visitante para testar o app ou configure o Supabase nas integrações.')
+        setErrorMessage('⚠️ Banco de dados não está carregado. Clique no botão abaixo para recarregar a página.')
       } else if (error.message === 'NETWORK_ERROR') {
         setErrorMessage('❌ Erro de conexão. Verifique sua internet e tente novamente.')
       } else if (error.message?.includes('User already registered')) {
@@ -242,7 +242,7 @@ export default function Home() {
       setResetEmail('')
     } catch (error: any) {
       if (error.message === 'SUPABASE_NOT_CONFIGURED') {
-        setErrorMessage('⚠️ Banco de dados não configurado. Use o modo visitante para testar o app.')
+        setErrorMessage('⚠️ Banco de dados não está carregado. Clique no botão abaixo para recarregar a página.')
       } else if (error.message === 'NETWORK_ERROR') {
         setErrorMessage('❌ Erro de conexão. Verifique sua internet e tente novamente.')
       } else {
@@ -292,6 +292,10 @@ export default function Home() {
     setErrorMessage('')
     setSuccessMessage('')
     window.scrollTo(0, 0)
+  }
+
+  const handleReloadPage = () => {
+    window.location.reload()
   }
 
   if (!isLoggedIn) {
@@ -351,9 +355,20 @@ export default function Home() {
               )}
 
               {errorMessage && (
-                <div className="flex items-center gap-2 p-4 bg-red-50 border-2 border-red-300 rounded-2xl">
-                  <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                  <span className="text-red-700 font-semibold text-sm">{errorMessage}</span>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 p-4 bg-red-50 border-2 border-red-300 rounded-2xl">
+                    <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+                    <span className="text-red-700 font-semibold text-sm">{errorMessage}</span>
+                  </div>
+                  {errorMessage.includes('não está carregado') && (
+                    <Button
+                      onClick={handleReloadPage}
+                      className="w-full h-12 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 font-black shadow-lg flex items-center justify-center gap-2"
+                    >
+                      <RefreshCw className="w-5 h-5" />
+                      Recarregar Página
+                    </Button>
+                  )}
                 </div>
               )}
               
@@ -467,9 +482,20 @@ export default function Home() {
               </div>
 
               {errorMessage && (
-                <div className="flex items-center gap-2 p-4 bg-red-50 border-2 border-red-300 rounded-2xl">
-                  <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                  <span className="text-red-700 font-semibold text-sm">{errorMessage}</span>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 p-4 bg-red-50 border-2 border-red-300 rounded-2xl">
+                    <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+                    <span className="text-red-700 font-semibold text-sm">{errorMessage}</span>
+                  </div>
+                  {errorMessage.includes('não está carregado') && (
+                    <Button
+                      onClick={handleReloadPage}
+                      className="w-full h-12 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 font-black shadow-lg flex items-center justify-center gap-2"
+                    >
+                      <RefreshCw className="w-5 h-5" />
+                      Recarregar Página
+                    </Button>
+                  )}
                 </div>
               )}
               
@@ -562,9 +588,20 @@ export default function Home() {
             )}
 
             {errorMessage && (
-              <div className="flex items-center gap-2 p-4 bg-red-50 border-2 border-red-300 rounded-2xl">
-                <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                <span className="text-red-700 font-semibold text-sm">{errorMessage}</span>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 p-4 bg-red-50 border-2 border-red-300 rounded-2xl">
+                  <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+                  <span className="text-red-700 font-semibold text-sm">{errorMessage}</span>
+                </div>
+                {errorMessage.includes('não está carregado') && (
+                  <Button
+                    onClick={handleReloadPage}
+                    className="w-full h-12 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 font-black shadow-lg flex items-center justify-center gap-2"
+                  >
+                    <RefreshCw className="w-5 h-5" />
+                    Recarregar Página
+                  </Button>
+                )}
               </div>
             )}
             
