@@ -35,9 +35,17 @@ export default function Home() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
-  // Scroll para o topo ao carregar a página
+  // Scroll para o topo ao carregar a página e verificar parâmetro signup
   useEffect(() => {
     window.scrollTo(0, 0)
+    
+    // Verificar se há parâmetro signup=true na URL
+    const urlParams = new URLSearchParams(window.location.search)
+    if (urlParams.get('signup') === 'true') {
+      setShowSignup(true)
+      // Limpar o parâmetro da URL
+      window.history.replaceState({}, '', window.location.pathname)
+    }
   }, [])
 
   // Verificar se usuário já está logado ao carregar

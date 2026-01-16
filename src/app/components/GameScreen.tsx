@@ -83,6 +83,8 @@ export function GameScreen({ username, onLogout, isGuestMode }: GameScreenProps)
   
   // Estado para modal de informação de tempos
   const [showTimeInfo, setShowTimeInfo] = useState(false)
+  const [showPremiumModal, setShowPremiumModal] = useState(false)
+  const [showAccountModal, setShowAccountModal] = useState(false)
   
   const tickSoundRef = useRef<HTMLAudioElement | null>(null)
   const alarmSoundRef = useRef<HTMLAudioElement | null>(null)
@@ -460,13 +462,18 @@ export function GameScreen({ username, onLogout, isGuestMode }: GameScreenProps)
   }
 
   const handlePremiumClick = () => {
-    if (isGuestMode) {
-      // Redirecionar para tela de login/cadastro
-      onLogout()
-    } else {
-      // Ativar premium
-      setIsPremium(true)
-    }
+    setShowPremiumModal(true)
+  }
+
+  const handlePremiumModalClick = () => {
+    setShowPremiumModal(false)
+    setShowAccountModal(true)
+  }
+
+  const handleCreateAccount = () => {
+    setShowAccountModal(false)
+    // Redireciona para a página de criar conta
+    window.location.href = '/?signup=true'
   }
 
   return (
@@ -1010,6 +1017,115 @@ export function GameScreen({ username, onLogout, isGuestMode }: GameScreenProps)
           </div>
         </div>
       </div>
+
+      {/* Modal Premium */}
+      <Dialog open={showPremiumModal} onOpenChange={setShowPremiumModal}>
+        <DialogContent className="max-w-md max-h-[85vh] overflow-hidden flex flex-col">
+          <DialogHeader className="flex-shrink-0">
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500">
+                Recurso Premium
+              </DialogTitle>
+              <Button
+                onClick={() => setShowPremiumModal(false)}
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0 rounded-full hover:bg-gray-100"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </Button>
+            </div>
+          </DialogHeader>
+
+          <div className="flex-1 overflow-y-auto pr-2">
+            <div className="text-center py-3">
+              <div className="mb-3">
+                <div className="inline-block p-3 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full">
+                  <Crown className="w-10 h-10 text-orange-500" />
+                </div>
+              </div>
+              <h3 className="text-xl font-black text-gray-800 mb-2">
+                Recursos Premium Exclusivos
+              </h3>
+              <p className="text-gray-600 font-bold mb-3 max-w-md mx-auto text-sm">
+                Desbloqueie funcionalidades incríveis para turbinar seus desafios!
+              </p>
+              <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-2xl p-3 mb-3 max-w-md mx-auto">
+                <p className="text-sm font-bold text-gray-700 mb-2">
+                  ✨ O que você ganha:
+                </p>
+                <ul className="text-left text-sm font-semibold text-gray-600 space-y-1">
+                  <li>🎨 Pacotes de temas exclusivos</li>
+                  <li>✏️ Editor de temas personalizados</li>
+                  <li>🎯 Desafios extras (roleta)</li>
+                  <li>🎭 Filtro de categorias</li>
+                  <li>🎪 Temas de filmes, séries e mais</li>
+                  <li>🌈 Temas de fantasia e ficção</li>
+                </ul>
+              </div>
+              <Button
+                onClick={handlePremiumModalClick}
+                className="h-12 px-6 rounded-2xl bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 font-black shadow-lg"
+              >
+                <Crown className="w-5 h-5 mr-2" />
+                Assinar Premium
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Criação de Conta */}
+      <Dialog open={showAccountModal} onOpenChange={setShowAccountModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-orange-500">
+                Criar Conta
+              </DialogTitle>
+              <Button
+                onClick={() => setShowAccountModal(false)}
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0 rounded-full hover:bg-gray-100"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </Button>
+            </div>
+          </DialogHeader>
+
+          <div className="text-center py-4">
+            <div className="mb-4">
+              <div className="inline-block p-4 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full">
+                <Crown className="w-12 h-12 text-orange-500" />
+              </div>
+            </div>
+            <h3 className="text-xl font-black text-gray-800 mb-3">
+              Premium Exclusivo
+            </h3>
+            <p className="text-gray-600 font-bold mb-4 max-w-sm mx-auto text-sm">
+              Para assinar o plano Premium, você precisa criar uma conta no Speed Drawing!
+            </p>
+            <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-4 mb-4">
+              <p className="text-sm font-bold text-gray-700 mb-2">
+                ✨ Com uma conta você terá:
+              </p>
+              <ul className="text-left text-sm font-semibold text-gray-600 space-y-1">
+                <li>💾 Histórico de desafios salvos</li>
+                <li>👥 Perfil personalizado</li>
+                <li>🏆 Estatísticas e conquistas</li>
+                <li>👑 Acesso ao Premium</li>
+              </ul>
+            </div>
+            <Button
+              onClick={handleCreateAccount}
+              className="w-full h-12 rounded-2xl bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 font-black shadow-lg"
+            >
+              Criar Conta Agora
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
